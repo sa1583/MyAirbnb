@@ -1,13 +1,20 @@
 package fastcampus.aop.part2.airbnb
 
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.*
+import com.naver.maps.map.CameraUpdate
+import com.naver.maps.map.LocationTrackingMode
+import com.naver.maps.map.NaverMap
+import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
+import com.naver.maps.map.util.MarkerIcons
 import fastcampus.aop.part2.airbnb.databinding.ActivityMainBinding
+import retrofit2.*
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMainBinding
@@ -40,6 +47,45 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val marker = Marker()
         marker.position = LatLng(37.6490534037591, 127.0708226638279)
         marker.map = naverMap
+
+        getHouseListFromAPI()
+    }
+
+    private fun getHouseListFromAPI() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://run.mocky.io")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        retrofit.create(HouseService::class.java).also {
+            it.getHouseList()
+                .enqueue(object : Callback<HouseDto> {
+                    override fun onResponse(call: Call<HouseDto>, response: Response<HouseDto>) {
+                        if (!response.isSuccessful) {
+                            return
+                        }
+                        response.body()?.let { dto ->
+                            updateMarker(dto.items)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<HouseDto>, t: Throwable) {
+                    }
+                })
+        }
+    }
+
+    private fun updateMarker(houses: List<HouseModel>) {
+        houses.forEach { house ->
+            val marker = Marker()
+            marker.position = LatLng(house.lat, house.lng)
+            // todo 마커 클릭 리스너
+            marker.map = naverMap
+            marker.tag = house.id
+            marker.icon = MarkerIcons.BLACK
+            marker.iconTintColor = Color.RED
+
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
