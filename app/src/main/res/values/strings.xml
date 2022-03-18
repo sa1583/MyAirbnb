@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Airbnb</string>
+    <string name="several_hotel">여러개의 숙소</string>
 </resources>
