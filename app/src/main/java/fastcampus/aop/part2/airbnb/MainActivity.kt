@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.widget.ViewPager2
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.LocationTrackingMode
@@ -20,14 +21,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMainBinding
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
+    private lateinit var viewPager: ViewPager2
+
+    private val viewPagerAdapter = HouseViewPagerAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.mapView.onCreate(savedInstanceState)
 
+        binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
+
+        viewPager = binding.houseViewPager
+        viewPager.adapter = viewPagerAdapter
     }
 
     override fun onMapReady(map: NaverMap) {
@@ -66,6 +73,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         }
                         response.body()?.let { dto ->
                             updateMarker(dto.items)
+                            viewPagerAdapter.submitList(dto.items)
                         }
                     }
 
