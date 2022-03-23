@@ -8,12 +8,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import fastcampus.aop.part2.airbnb.databinding.ItemHouseDetailForViewpagerBinding
 
-class HouseViewPagerAdapter: ListAdapter<HouseModel, HouseViewPagerAdapter.ItemViewHolder>(diffUtil) {
+class HouseViewPagerAdapter(val itemClicked: (HouseModel) -> Unit): ListAdapter<HouseModel, HouseViewPagerAdapter.ItemViewHolder>(diffUtil) {
 
     inner class ItemViewHolder(private val binding: ItemHouseDetailForViewpagerBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(houseModel: HouseModel) {
             binding.titleTextView.text =  houseModel.title
             binding.priceTextView.text = "${houseModel.price}원"
+
+            binding.root.setOnClickListener {
+                itemClicked(houseModel)
+            }
 
             Glide
                 .with(binding.thumbnailImageView.context)
